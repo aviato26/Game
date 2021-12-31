@@ -6,11 +6,11 @@ export class MainWorld
 {
   constructor(scene)
   {
-    this.floorSize = 5000;
+    this.floorSize = 50;
     this.floor = this.addFloor(this.floorSize);
 
-    this.floor.rotation.x += 1.5;
-    this.floor.position.y -= 3.0;
+    this.floor.rotation.x += Math.PI / 2;
+    this.floor.position.y -= 2.0;
     scene.add(this.floor)
   }
 
