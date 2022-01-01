@@ -6,6 +6,9 @@ import { FollowCamera } from './Cameras/FollowCamera.js';
 import { CharacterControls } from './model/CharacterControls/Controls.js';
 
 import model from './model/knight.fbx';
+import boss1 from './model/mutant.fbx';
+//import bossIdle from './model/animations/bosses/bossidle.fbx';
+import bossIdle from './model/animations/bosses/idle2.fbx';
 //import dance from './dance.fbx';
 import walk from './model/animations/walk.fbx';
 import run from './model/animations/run.fbx';
@@ -39,40 +42,53 @@ export default class Main
     document.body.appendChild( this.renderer.domElement );
 
     // clock to update animation sequences
-    this.clock = new THREE.Clock();
+    // must use different clock for every animation mixer (for every model) or animation will not run
+    this.heroClock = new THREE.Clock();
+    this.boss1Clock = new THREE.Clock();
 
     this.model = new ModelLoader();
-    // load model
-    this.model.loadModel(model)
-    .then(model =>
-      {
-        this.characterController = new CharacterControls(this.camera, model);
-        //this.tempCharacterPos = model;
-        this.followCamera = new FollowCamera(this.camera, model);
-        this.scene.add(model)
-      })
-    .catch(err => console.log(err))
-    //this.characterController = new CharacterControls(this.camera, this.scene.children[1]);
-    // add World objects;
+    this.boss1 = new ModelLoader();
 
+    // load model
+    const hero = this.model.loadModel(model)
+      .then(model =>
+        {
+          // start initial animation
+          this.model.initialAnimation(idle, model);
+
+          // instantiate character controller for movements
+          this.characterController = new CharacterControls(this.camera, model, this.model);
+
+          // instantiate camera to follow character
+          this.followCamera = new FollowCamera(this.camera, model);
+          this.scene.add(model)
+        })
+      .catch(err => console.log(err))
+
+    // make the boss model larger;
+    this.boss1.modelSize = 0.15;
+
+    // load first boss model
+    const firstBoss = this.boss1.loadModel(boss1)
+      .then(boss =>{
+        boss.rotation.y += Math.PI;
+        boss.position.z = -80;
+        this.boss1.initialAnimation(bossIdle, boss)
+
+        this.scene.add(boss)
+      })
+      .catch(err => console.log(err))
+
+    // object to add feature to the world
     this.worldObjects = new MainWorld(this.scene);
 
-    //this.camera.position.z = 5;
-
-    this.cameraOffset = new THREE.Vector3(0.0, 5.0, 5.0); // NOTE Constant offset between the camera and the target
-
-    // NOTE Assuming the camera is direct child of the Scene
-    this.objectPosition = new THREE.Vector3(0, 0, 0);
-
-    //this.followCamera = new FollowCamera({camera: null, target: null})
-/*
-    this.waitForModelLoad()
-    .then(c => console.log(c))
+    // checking to see if all models are loaded then calling the animation function
+    Promise.all([hero, firstBoss])
+    .then(c => this.animate())
     .catch(err => console.log(err))
-*/
+
+    // bind this to the main class, so we can pass the method to the requestAnimationFrame function
     this.animate = this.animate.bind(this);
-    //console.log(this.waitForModelLoad())
-    this.animate();
   }
 
   animate(){
@@ -80,37 +96,22 @@ export default class Main
     //this.scene.rotation.y += 0.01
 
     // the models mixer needs to be update to move animation
-    if(this.model.mixer)
-    {
-      this.model.mixer.update(this.clock.getDelta());
-      //this.scene.children[2].position.z += 0.01;
-      //this.model.position.z += 0.01
-    }
+    this.model.mixer.update(this.heroClock.getDelta());
 
-    if(this.characterController)
-    {
-      this.characterController.update();
-      this.followCamera.update();
-      //this.tempCharacterPos.position.y -= 0.1;
-      //this.camera.lookAt(this.characterController.character.position)
-      //console.log(this.camera)
-      //this.scene.children[2].position.y += 0.01;
-      //this.scene.children[2].getWorldPosition(this.objectPosition);
+    // update bosses animation mixer
+    this.boss1.mixer.update(this.boss1Clock.getDelta());
 
-      //this.camera.position.copy(this.objectPosition).add(this.cameraOffset);
-      //this.characterController._params.target = this.scene.children[2];
-      //this.characterController.Update(this.clock.getDelta())
-      /*
-      this.modelPosition = this.scene.children[2];
-      //console.log(this.followCamera)
-      this.followCamera._params.camera = this.camera;
-      this.followCamera._params.target = this.modelPosition;
-      //console.log(this.modelPosition)
-      //this.followCamera.update();
-      */
-      //console.log(this.camera.position)
-    }
+    // update character movements
+    this.characterController.update();
 
+    // update camera positions
+    this.followCamera.update();
+
+    // update the models animation index from the key events from character controller
+    this.model.updateAnimationIndex(this.characterController.animationIndex);
+
+    // update animations in the model class
+    //this.model.animationUpdate();
 
     this.renderer.render( this.scene, this.camera );
   };
