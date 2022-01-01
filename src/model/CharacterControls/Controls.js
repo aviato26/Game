@@ -3,19 +3,23 @@ import * as THREE from 'three';
 
 export class CharacterControls
 {
-  constructor(camera, character)
+  constructor(camera, character, animations)
   {
     this.velocity = 0.0;
     this.speed = 0.0;
 
     this.character = character;
+    this.animeActions = animations;
+    this.keyDown = false;
+    //console.log(this.animeActions)
 
     this.keys =
     {
       up: false,
       down: false,
       left: false,
-      right: false
+      right: false,
+      animationIndex: 0
     }
 
     this.addEventListeners();
@@ -26,31 +30,53 @@ export class CharacterControls
   {
 
     document.body.addEventListener('keydown', (e) => {
-      // apply movements when key is pressed
-      switch(e.key)
+      // keydown events trigger continously when held down so this checks if the event was already triggered to keep animations smooth
+      if(!e.repeat)
       {
-        case "ArrowUp":
-          //this.speed = 0.01;
-          this.keys.up = true;
-        break;
+        // apply movements when key is pressed
+        switch(e.key)
+        {
+          case "ArrowUp":
+            //this.speed = 0.01;
+            this.keys.up = true;
+            this.animationIndex = 1;
+            this.animeActions.updateAnimationIndex(this.animationIndex);
+            this.animeActions.animationUpdate()
+          break;
 
-        case "ArrowDown":
-          //this.speed = -0.01;
-          this.keys.down = true;
-        break;
+          case "ArrowDown":
+            //this.speed = -0.01;
+            this.keys.down = true;
+            this.animationIndex = 2;
+            this.animeActions.updateAnimationIndex(this.animationIndex);
+            this.animeActions.animationUpdate()
+          break;
 
-        case "ArrowRight":
-          //this.character.rotateY(0.05);
-          this.keys.right = true;
-        break;
+          case "ArrowRight":
+            //this.character.rotateY(0.05);
+            this.keys.right = true;
+          break;
 
-        case "ArrowLeft":
-          //this.character.rotateY(-0.05);
-          this.keys.left = true;
-        break;
+          case "ArrowLeft":
+            //this.character.rotateY(-0.05);
+            this.keys.left = true;
+          break;
 
-        default:
-        break;
+          case "s":
+            this.animationIndex = 4;
+            this.animeActions.updateAnimationIndex(this.animationIndex);
+            this.animeActions.animationUpdate()
+          break;
+
+          case "a":
+            this.animationIndex = 5;
+            this.animeActions.updateAnimationIndex(this.animationIndex);
+            this.animeActions.animationUpdate()
+          break;
+
+          default:
+          break;
+        }
       }
     })
 
@@ -61,11 +87,17 @@ export class CharacterControls
         case "ArrowUp":
           //this.speed = 0.01;
           this.keys.up = false;
+          this.animationIndex = 0;
+          this.animeActions.updateAnimationIndex(this.animationIndex);
+          this.animeActions.animationUpdate()
         break;
 
         case "ArrowDown":
           //this.speed = -0.01;
           this.keys.down = false;
+          this.animationIndex = 0;
+          this.animeActions.updateAnimationIndex(this.animationIndex);
+          this.animeActions.animationUpdate()          
         break;
 
         case "ArrowRight":
@@ -76,6 +108,18 @@ export class CharacterControls
         case "ArrowLeft":
           //this.character.rotateY(-0.05);
           this.keys.left = false;
+        break;
+
+        case "s":
+          this.animationIndex = 0;
+          this.animeActions.updateAnimationIndex(this.animationIndex);
+          this.animeActions.animationUpdate()
+        break;
+
+        case "a":
+          this.animationIndex = 0;
+          this.animeActions.updateAnimationIndex(this.animationIndex);
+          this.animeActions.animationUpdate()
         break;
 
         default:
@@ -92,9 +136,9 @@ export class CharacterControls
     this.speed = 0.0;
 
     // increase speed when walking forward or backwards
-    if ( this.keys.up )
+    if ( this.keys.up && this.animationIndex === 1)
       this.speed = 0.3;
-    else if ( this.keys.down )
+    else if ( this.keys.down && this.animationIndex === 2)
       this.speed = -0.3;
 
       // turn character

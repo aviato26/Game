@@ -6,7 +6,7 @@ export class MainWorld
 {
   constructor(scene)
   {
-    this.floorSize = 50;
+    this.floorSize = 9000;
     this.floor = this.addFloor(this.floorSize);
 
     this.floor.rotation.x += Math.PI / 2;
