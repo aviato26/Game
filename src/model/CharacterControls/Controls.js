@@ -39,17 +39,25 @@ export class CharacterControls
           case "ArrowUp":
             //this.speed = 0.01;
             this.keys.up = true;
+            this.walkingForward = true;
+            /*
             this.animationIndex = 1;
             this.animeActions.updateAnimationIndex(this.animationIndex);
             this.animeActions.animationUpdate()
+            */
+            this.animeActions.updateCharacterState('walk');
           break;
 
           case "ArrowDown":
             //this.speed = -0.01;
             this.keys.down = true;
+            this.walkingBackward = true;
+            /*
             this.animationIndex = 2;
             this.animeActions.updateAnimationIndex(this.animationIndex);
             this.animeActions.animationUpdate()
+            */
+            this.animeActions.updateCharacterState('walkBack');
           break;
 
           case "ArrowRight":
@@ -63,15 +71,21 @@ export class CharacterControls
           break;
 
           case "s":
+          /*
             this.animationIndex = 4;
             this.animeActions.updateAnimationIndex(this.animationIndex);
             this.animeActions.animationUpdate()
+          */
+            this.animeActions.updateCharacterState('attack');
           break;
 
           case "a":
+          /*
             this.animationIndex = 5;
             this.animeActions.updateAnimationIndex(this.animationIndex);
             this.animeActions.animationUpdate()
+          */
+            this.animeActions.updateCharacterState('block');
           break;
 
           default:
@@ -87,17 +101,25 @@ export class CharacterControls
         case "ArrowUp":
           //this.speed = 0.01;
           this.keys.up = false;
+          this.walkingForward = false;
+          /*
           this.animationIndex = 0;
           this.animeActions.updateAnimationIndex(this.animationIndex);
           this.animeActions.animationUpdate()
+          */
+          this.animeActions.updateCharacterState();
         break;
 
         case "ArrowDown":
           //this.speed = -0.01;
           this.keys.down = false;
+          this.walkingBackward = false;
+/*
           this.animationIndex = 0;
           this.animeActions.updateAnimationIndex(this.animationIndex);
-          this.animeActions.animationUpdate()          
+          this.animeActions.animationUpdate()
+*/
+          this.animeActions.updateCharacterState();
         break;
 
         case "ArrowRight":
@@ -111,15 +133,21 @@ export class CharacterControls
         break;
 
         case "s":
+        /*
           this.animationIndex = 0;
           this.animeActions.updateAnimationIndex(this.animationIndex);
           this.animeActions.animationUpdate()
+          */
+          this.animeActions.updateCharacterState();
         break;
 
         case "a":
+        /*
           this.animationIndex = 0;
           this.animeActions.updateAnimationIndex(this.animationIndex);
           this.animeActions.animationUpdate()
+        */
+          this.animeActions.updateCharacterState();
         break;
 
         default:
@@ -136,9 +164,9 @@ export class CharacterControls
     this.speed = 0.0;
 
     // increase speed when walking forward or backwards
-    if ( this.keys.up && this.animationIndex === 1)
+    if ( this.walkingForward )
       this.speed = 0.3;
-    else if ( this.keys.down && this.animationIndex === 2)
+    else if ( this.walkingBackward )
       this.speed = -0.3;
 
       // turn character

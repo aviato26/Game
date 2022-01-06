@@ -9,7 +9,7 @@ module.exports =
 
   output:
   {
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, 'docs'),
     filename: 'main.js'
   },
 
@@ -47,7 +47,7 @@ module.exports =
   {
     port: 3000,
     static:{
-      directory: path.join(__dirname, 'dist'),
+      directory: path.join(__dirname, 'docs'),
     },
     hot: true
   }
