@@ -15,22 +15,36 @@ import block from './animations/block2.fbx';
 import mIdle from './animations/bosses/bossidle.fbx';
 //import sword from './weapons/sword1.fbx';
 
-export class ModelLoader
+export class Character
 {
-  constructor()
+  constructor(animations)
   {
     this.loader = new FBXLoader();
-    this.animations = [];
-    this.animation = [];
+    //this.animations = [];
+    //this.animation = [];
+    //this.enemyAnimations = [];
     //this.lastAction = new THREE.AnimationAction;
     //this.activeAction = new THREE.AnimationAction;
-    this.lastAnimeIndex = 0;
-    this.currentAnimeIndex = 0;
-    this.animationIndex = 0;
+    //this.lastAnimeIndex = 0;
+    //this.currentAnimeIndex = 0;
+    //this.animationIndex = 0;
     this.modelSize = 0.1;
-    //this.loadModel(scene);
-  }
 
+    // passing in animation states from classes in AnimationsForModels folder
+    //this.characterPreviousState = null;
+    this.characterState = animations;
+
+    //this.preloadAnimations();
+  }
+/*
+  animations(animations)
+  {
+    for(let i = 0; i < animations.length; i++)
+    {
+      this.loader.load(animations[i], (anime) => {})
+    }
+  }
+*/
   loadModel(model)
   {
     return new Promise((res, rej) =>
@@ -52,15 +66,19 @@ export class ModelLoader
 
       const anim = new FBXLoader();
 
-      this.animation.push(idle, walk, walkBack, run, slash, block);
+      //this.animation.push(idle, walk, walkBack, run, slash, block);
 
       anim.load(idle, (idle) =>
       {
+        /*
         // name animation
         idle.animations[0].name = 'idle';
         this.animations.push(this.mixer.clipAction(idle.animations[0]));
+        */
+        // set initial character animation which would be idle
+        this.restState = this.mixer.clipAction(idle.animations[0]);
       });
-
+/*
       anim.load(walk, (wAnime) =>
       {
         wAnime.animations[0].name = 'walk';
@@ -72,7 +90,7 @@ export class ModelLoader
         runAnime.animations[0].name = 'run';
         this.animations.push(this.mixer.clipAction(runAnime.animations[0]));
       });
-
+*/
       if(gltf)
       {
         res(gltf)
@@ -101,32 +119,78 @@ export class ModelLoader
     })
   })
   }
-
+/*
   updateAnimationIndex(index)
   {
     this.animationIndex = index;
   }
-
-  initialAnimation(startingAnimation, model)
+*/
+  initialAnimation()
   {
-      this.loader.load(startingAnimation, (a) => {
+
+    this.mixer.dispatchEvent({
+      type: 'finished',
+      action: this,
+      //direction: deltaTime < 0 ? -1 : 1
+    })
+
+    this.loader.load(this.characterState.idle, (a) => {
+      this.animationClip = a.animations[0];
+
       this.anime = this.mixer.clipAction(a.animations[0]);
       this.anime.play();
     })
   }
 
+  updateCharacterState(state)
+  {
+    switch(state)
+    {
+      case 'walk':
+        this.updateAnimation(this.characterState.walk);
+      break;
+
+      case 'walkBack':
+        this.updateAnimation(this.characterState.walkBack);
+      break;
+
+      case 'attack':
+        this.updateAnimation(this.characterState.attack);
+      break;
+
+      case 'block':
+        this.updateAnimation(this.characterState.block);
+      break;
+
+      default:
+        this.updateAnimation(this.characterState.idle);
+      break;
+    }
+  }
+
+  updateAnimation(state)
+  {
+    this.loader.load(state, (a) => {
+      this.anime.crossFadeTo(this.restState, 0.3, true);
+      this.anime = this.mixer.clipAction(a.animations[0]);
+      this.anime.fadeIn(0.3);
+      this.anime.play();
+    })
+
+  }
+/*
   animationUpdate()
   {
     this.loader.load(this.animation[this.animationIndex], (a) => {
       //this.mixer = new THREE.AnimationMixer(gltf);
       //this.mixer.stopAllAction();
       //this.anime.reset();
-      this.anime.crossFadeTo(this.animations[0], 0.3, true)
+      this.anime.crossFadeTo(this.animations[0], 0.3, true);
       this.anime = this.mixer.clipAction(a.animations[0]);
       this.anime.fadeIn(0.3);
       this.anime.play();
       this.lastAnimeIndex = this.animationIndex;
     })
   }
-
+*/
 }
