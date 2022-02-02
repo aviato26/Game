@@ -23,11 +23,13 @@ export class EnemyAI
 
   atAttackDistance()
   {
-    if(this.getTargetDistance() < 60 && this.getTargetDistance() > 16)
+    // once hero characrer gets within this distance area, enemy character will walk towards them
+    if(this.getTargetDistance() < 60 && this.getTargetDistance() > 17)
     {
       this.enemyState = 'walk';
     }
-    else
+    // once enemy character is within this short area (5 and 16), enemy will begin to attack
+    else if(this.getTargetDistance() <= 16 && this.getTargetDistance() >= 5)
     {
       this.enemyState = 'attack';
     }
